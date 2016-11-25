@@ -578,6 +578,30 @@ public class InAppBrowser extends CordovaPlugin {
                 return value;
             }
 
+            private int hexStringToColor(String hex) {
+                int result = 0;
+
+                if (hex != null && !hex.isEmpty()) {
+                    if (hex.charAt(0) == '#') {
+                        hex = hex.substring(1);
+                    }
+
+                    // No alpha, that's fine, we will just attach ff.
+                    if (hex.length() < 8) {
+                        hex += "ff";
+                    }
+
+                    result = (int) Long.parseLong(hex, 16);
+
+                    // Almost done, but Android color code is in form of ARGB instead of
+                    // RGBA, so we gotta shift it a bit.
+                    int alpha = (result & 0xff) << 24;
+                    result = result >> 8 & 0xffffff | alpha;
+                }
+
+                return result;
+            }
+
             @SuppressLint("NewApi")
             public void run() {
 
@@ -600,7 +624,7 @@ public class InAppBrowser extends CordovaPlugin {
                 // Toolbar layout
                 RelativeLayout toolbar = new RelativeLayout(cordova.getActivity());
                 //Please, no more black!
-                toolbar.setBackgroundColor(android.graphics.Color.LTGRAY);
+                toolbar.setBackgroundColor(hexStringToColor("#012062"));
                 toolbar.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, this.dpToPixels(44)));
                 toolbar.setPadding(this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2), this.dpToPixels(2));
                 toolbar.setHorizontalGravity(Gravity.LEFT);
